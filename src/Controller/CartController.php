@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\UserBeer;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,10 +14,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class CartController extends AbstractController
 {
     private $httpClient;
+    private $entityManager;
 
-    public function __construct(HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient, EntityManagerInterface $entityManager)
     {
         $this->httpClient = $httpClient;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/cart', name: 'app_cart')]
@@ -49,6 +53,7 @@ class CartController extends AbstractController
     #[Route('/cart/add/{id}', name: 'app_cart_add')]
     public function add($id, SessionInterface $session, Request $request): Response
     {
+        // Ajouter au panier de session
         $cart = $session->get('cart', []);
         $quantity = $request->query->get('quantity', 1);
 
@@ -59,6 +64,16 @@ class CartController extends AbstractController
         }
 
         $session->set('cart', $cart);
+
+        // Si l'utilisateur est connecté, lier la bière à son compte
+        if ($this->getUser()) {
+            $userBeer = new UserBeer();
+            $userBeer->setUser($this->getUser());
+            $userBeer->setBeerId($id);
+            
+            $this->entityManager->persist($userBeer);
+            $this->entityManager->flush();
+        }
 
         $this->addFlash('success', 'La bière a été ajoutée au panier');
         
@@ -76,6 +91,20 @@ class CartController extends AbstractController
         }
 
         $session->set('cart', $cart);
+
+        // Si l'utilisateur est connecté, supprimer le lien avec la bière
+        if ($this->getUser()) {
+            $userBeer = $this->entityManager->getRepository(UserBeer::class)->findOneBy([
+                'user' => $this->getUser(),
+                'beerId' => $id
+            ]);
+            
+            if ($userBeer) {
+                $this->entityManager->remove($userBeer);
+                $this->entityManager->flush();
+            }
+        }
+
         $this->addFlash('success', 'La bière a été retirée du panier');
         return $this->redirectToRoute('app_cart');
     }
@@ -90,6 +119,19 @@ class CartController extends AbstractController
             $cart[$id] = $quantity;
         } else {
             unset($cart[$id]);
+            
+            // Si l'utilisateur est connecté et la quantité est 0, supprimer le lien
+            if ($this->getUser()) {
+                $userBeer = $this->entityManager->getRepository(UserBeer::class)->findOneBy([
+                    'user' => $this->getUser(),
+                    'beerId' => $id
+                ]);
+                
+                if ($userBeer) {
+                    $this->entityManager->remove($userBeer);
+                    $this->entityManager->flush();
+                }
+            }
         }
 
         $session->set('cart', $cart);

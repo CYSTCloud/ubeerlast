@@ -7,9 +7,18 @@
                 <h1>Mon Compte</h1>
                 <p>Bienvenue {{ app.user.firstname }} {{ app.user.lastname }}</p>
                 <p>Email : {{ app.user.email }}</p>
-                <a href="{{ path('app_account_modify_pwd') }}" class="btn btn-primary mb-2">Modifier mon mot de passe</a>
-                <br>
-                <a href="{{ path('app_logout') }}" class="btn btn-danger">Se déconnecter</a>
+                
+                <div class="d-flex flex-column gap-2">
+                    <a href="{{ path('app_account_modify_pwd') }}" class="btn btn-primary">Modifier mon mot de passe</a>
+                    
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('admin') }}" class="btn btn-success">
+                            <i class="fas fa-cog"></i> Accéder au Dashboard Admin
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ path('app_logout') }}" class="btn btn-danger">Se déconnecter</a>
+                </div>
             </div>
         </div>
     </div>
