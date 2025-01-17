@@ -19,15 +19,21 @@ final class HomeController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(): Response
     {
-        $response = $this->httpClient->request(
-            'GET',
-            'https://ubeer-production.up.railway.app/beers'
-        );
+        try {
+            $response = $this->httpClient->request(
+                'GET',
+                'https://ubeer-production.up.railway.app/beers'
+            );
 
-        $beers = $response->toArray();
+            $beers = $response->toArray();
 
-        return $this->render('home/index.html.twig', [
-            'beers' => $beers
-        ]);
+            return $this->render('home/index.html.twig', [
+                'beers' => $beers
+            ]);
+        } catch (\Exception $e) {
+            return $this->render('home/index.html.twig', [
+                'beers' => []
+            ]);
+        }
     }
 }

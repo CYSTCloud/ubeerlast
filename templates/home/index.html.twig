@@ -44,9 +44,12 @@
                                     </div>
                                     <!-- Actions du produit -->
                                     <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                        <div class="text-center">
-                                            <a href="{{ path('app_beer_show', {'id': beer.id}) }}" class="btn btn-outline-dark mt-auto">
+                                        <div class="text-center d-flex gap-2 justify-content-center">
+                                            <a class="btn btn-outline-dark mt-auto" href="{{ path('app_beer_show', {'id': beer.id}) }}">
                                                 Voir détails
+                                            </a>
+                                            <a class="btn btn-primary mt-auto" href="{{ path('app_cart_add', {'id': beer.id}) }}">
+                                                <i class="bi bi-cart-plus"></i> Ajouter
                                             </a>
                                         </div>
                                     </div>

@@ -24,7 +24,7 @@
                         <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Accueil</a></li>
                         <li class="nav-item"><a class="nav-link" href="#nos-bieres">Nos Bières</a></li>
                     </ul>
-                    <form class="d-flex align-items-center">
+                    <div class="d-flex">
                         {% if app.user %}
                             <a href="{{ path('app_account') }}" class="btn btn-outline-light me-2">
                                 <i class="bi-person-fill me-1"></i>
@@ -36,12 +36,15 @@
                                 Connexion
                             </a>
                         {% endif %}
-                        <button class="btn btn-outline-light" type="submit">
-                            <i class="bi-cart-fill me-1"></i>
-                            Panier
-                            <span class="badge bg-light text-dark ms-1 rounded-pill">0</span>
-                        </button>
-                    </form>
+                        <a href="{{ path('app_cart') }}" class="btn btn-outline-light me-2">
+                            <i class="bi-cart-fill me-1"></i> Panier
+                            {% set cartTotal = 0 %}
+                            {% for item in app.session.get('cart', {}) %}
+                                {% set cartTotal = cartTotal + item %}
+                            {% endfor %}
+                            <span class="badge bg-light text-dark ms-1 rounded-pill">{{ cartTotal }}</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </nav>
